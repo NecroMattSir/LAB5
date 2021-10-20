@@ -74,6 +74,9 @@ protected:
 	float p3m1rot;
 	float p3m2rot;
 
+	//textures
+	GLuint tex1;
+	GLuint tex2;
 
 };
 

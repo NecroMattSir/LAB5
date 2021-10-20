@@ -11,6 +11,8 @@ Scene::Scene(Input *in)
 	// Other OpenGL / render setting should be applied here.
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_LIGHTING);
+	glEnable(GL_TEXTURE_2D);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	// Initialise scene variables
 	rot = 0;
@@ -22,6 +24,28 @@ Scene::Scene(Input *in)
 	p2m1m1rot = 0;
 	p3m1rot = 0;
 	p3m2rot = 0;
+
+
+	tex1 = SOIL_load_OGL_texture(
+		"gfx/crate.png",
+		SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID,
+		SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB|
+		SOIL_FLAG_COMPRESS_TO_DXT);
+
+	tex2 = SOIL_load_OGL_texture(
+		"gfx/checked.png",
+		SOIL_LOAD_AUTO,
+		SOIL_CREATE_NEW_ID,
+		SOIL_FLAG_MIPMAPS | SOIL_FLAG_NTSC_SAFE_RGB |
+		SOIL_FLAG_COMPRESS_TO_DXT);
+
+	//glBindTexture(GL_TEXTURE_2D, tex1);
+
+	//glBindTexture(GL_TEXTURE_2D, tex2);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 void Scene::handleInput(float dt)
@@ -72,6 +96,7 @@ void Scene::render() {
 
 	// Reset transformations
 	glLoadIdentity();
+	glDisable(GL_TEXTURE_2D);
 	// Set the camera
 	gluLookAt(0.0f, 5.0f, 8.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 	
@@ -102,7 +127,8 @@ void Scene::render() {
 	glEnable(GL_LIGHT1);
 
 	
-
+	//midplane
+	glColor3f(0.2f, 0.4f, 0.6f);
 	glBegin(GL_QUADS);
 	for (float z = -10.0f; z < 10.f; z += 1.0f)
 	{
@@ -119,6 +145,77 @@ void Scene::render() {
 		}
 	}
 	glEnd();
+
+	//sideplanes
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, tex2);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glBegin(GL_QUADS);
+	for (float z = -90.0f; z < 10.f; z += 1.0f)
+	{
+		for (float y = -50.f; y < 50.f; y += 1.0f)
+		{
+			/*int temp = y + z;
+			if (temp%2 == 0)
+			{
+				glColor3f(1.0f, 1.0f, 1.0f);
+			}
+			else
+			{
+
+				glColor3f(0.0f, 0.0f, 0.0f);
+			}*/
+			glNormal3f(1.0f, 0.0f, 0.0f);
+			glTexCoord2f(y, z);
+			glVertex3f(-10, y, z);
+			glTexCoord2f(y, z+1);
+			glVertex3f(-10, y, z+1);
+			glTexCoord2f(y+1, z+1);
+			glVertex3f(-10, y+1, z + 1.f);
+			glTexCoord2f(y+1, z);
+			glVertex3f(-10, y+1, z);
+		}
+	}
+	glEnd();
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBegin(GL_QUADS);
+	for (float z = -90.0f; z < 10.f; z += 1.0f)
+	{
+		for (float y = -50.f; y < 50.f; y += 1.0f)
+		{
+			/*int temp = y + z;
+			if (temp % 2 == 0)
+			{
+				glColor3f(1.0f, 1.0f, 1.0f);
+			}
+			else
+			{
+
+				glColor3f(0.0f, 0.0f, 0.0f);
+			}*/
+			glNormal3f(-1.0f, 0.0f, 0.0f);
+			glTexCoord2f(y, z+1);
+			glVertex3f(10, y, z+1);
+			glTexCoord2f(y, z);
+			glVertex3f(10, y, z);
+			glTexCoord2f(y+1, z);
+			glVertex3f(10, y + 1, z);
+			glTexCoord2f(y+1, z+1);
+			glVertex3f(10, y + 1, z+1);
+		}
+	}
+	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+
 
 	//glPushMatrix();
 	//glTranslatef(2, 1, -5);
@@ -431,69 +528,93 @@ void Scene::displayText(float x, float y, float r, float g, float b, char* strin
 
 void Scene::DrawCube()
 {
+	glEnable(GL_TEXTURE_2D); 
+	glBindTexture(GL_TEXTURE_2D, tex1);
 	glBegin(GL_QUADS);
 	{
-		glColor3f(0.5f, 0.0f, 0.0f);
+		glColor3f(1.0f, 1.0f, 1.0f);
+
+
 		glNormal3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(-0.5f, 0.5f, 0.5f);
 		glNormal3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(0.5f, 0.5f, 0.5f);
 		glNormal3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(0.5f, -0.5f, 0.5f);
 		glNormal3f(0.0f, 0.0f, 1.0f);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(-0.5f, -0.5f, 0.5f);
 
 
-		glColor3f(0.5f, 0.0f, 0.0f);
 		glNormal3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(0.5f, 0.5f, 0.5f);
 		glNormal3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(0.5f, 0.5f, -0.5f);
 		glNormal3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(0.5f, -0.5f, -0.5f);
 		glNormal3f(1.0f, 0.0f, 0.0f);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(0.5f, -0.5f, 0.5f);
 
 
-		glColor3f(0.5f, 0.0f, 0.0f);
 		glNormal3f(0.0f, -1.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(0.5f, -0.5f, 0.5f);
 		glNormal3f(0.0f, -1.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(0.5f, -0.5f, -0.5f);
 		glNormal3f(0.0f, -1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(-0.5f, -0.5f, -0.5f);
 		glNormal3f(0.0f, -1.0f, 0.0f);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(-0.5f, -0.5f, 0.5f);
 
-		glColor3f(0.5f, 0.0f, 0.0f);
 		glNormal3f(0.0f, 0.0f, -1.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(0.5f, -0.5f, -0.5f);
 		glNormal3f(0.0f, 0.0f, -1.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(-0.5f, -0.5f,- 0.5f);
 		glNormal3f(0.0f, 0.0f, -1.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(-0.5f, 0.5f, -0.5f);
 		glNormal3f(0.0f, 0.0f, -1.0f);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(0.5f, 0.5f, -0.5f);
 
-		glColor3f(0.5f, 0.0f, 0.0f);
 		glNormal3f(-1.0f, 0.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(-0.5f, -0.5f, -0.5f);
 		glNormal3f(-1.0f, 0.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(-0.5f, -0.5f, 0.5f);
 		glNormal3f(-1.0f, 0.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(-0.5f, 0.5f, 0.5f);
 		glNormal3f(-1.0f, 0.0f, 0.0f);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(-0.5f, 0.5f, -0.5f);
 
-		glColor3f(0.5f, 0.0f, 0.0f);
 		glNormal3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(-0.5f, 0.5f, -0.5f);
 		glNormal3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(-0.5f, 0.5f, 0.5f);
 		glNormal3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(0.5f, 0.5f, 0.5f);
 		glNormal3f(0.0f, 1.0f, 0.0f);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(0.5f, 0.5f, -0.5f);
 	}
 	glEnd();
+	glDisable(GL_TEXTURE_2D);
 }
